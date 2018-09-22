@@ -1,0 +1,25 @@
+{
+    "name": "eftec/securityone",
+    "description": "It's a barebone security class written on PHP",
+    "version": "1.0",
+    "type": "library",
+    "keywords": [
+        "security",
+        "php"
+    ],
+    "homepage": "https://github.com/EFTEC/SecurityOne",
+    "authors": [
+        {
+            "name": "Jorge Castro Castillo",
+            "homepage": "https://github.com/EFTEC/"
+        }
+    ],
+    "minimum-stability": "beta",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "eftec\\": "lib/"
+        }
+    }
+}
+
