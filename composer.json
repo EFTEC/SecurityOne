@@ -5,6 +5,9 @@
     "type": "library",
     "keywords": [
         "security",
+        "php-library",
+        "php7",
+        "security-tools",
         "php"
     ],
     "homepage": "https://github.com/EFTEC/SecurityOne",
@@ -14,7 +17,6 @@
             "homepage": "https://github.com/EFTEC/"
         }
     ],
-    "minimum-stability": "beta",
     "license": "MIT",
     "autoload": {
         "psr-4": {
