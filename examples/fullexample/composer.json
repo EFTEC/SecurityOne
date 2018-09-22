@@ -3,7 +3,8 @@
     "description": "full example with database",
     "type": "project",
     "require": {
-        "eftec/daoone": "^3.4"
+        "eftec/daoone": "^3.4",
+        "eftec/bladeone": "^3.11"
     },
     "license": "MIT",
     "authors": [

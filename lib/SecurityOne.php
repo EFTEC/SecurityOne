@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 1.0 20180922
+ * @version 1.1 20180922
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -19,16 +19,28 @@ class SecurityOne
     const READWRITE=SecurityOne::READ +SecurityOne::WRITE;
     const ADMIN=SecurityOne::READ +SecurityOne::WRITE + 4;
 
+
     public $user;
+    public $password;
     public $name;
-    public $email;
+
+    public $cookieID;
+
+    public $email=null;
+    public $iduser=null;
+    public $phone=null;
+    public $address=null;
     public $uid;
     /** @var string[] */
     public $group;
-    public $password;
+
 
     /** @var boolean */
     private $isLogged=false;
+
+    public $encmethod='sha256';
+    public $cryptpwd='123456'; // not yet used.
+    public $salt='somesalt';
 
 
     /** @var callable */
@@ -39,13 +51,18 @@ class SecurityOne
     private  $isAllowedFn;
     /** @var callable */
     private  $getPermissionFn;
-
+    /** @var callable */
+    private  $storeCookieFn;
+    /** @var callable */
+    private  $getStoreCookieFn;
     /**
      * SecurityOne constructor.
      * @param bool $autologin
+     * @param string $salt it's used for encryption, it must be changed and be unique for your project.
      */
-    public function __construct($autologin=true)
+    public function __construct($autologin=true,$salt="Zoamelgustar")
     {
+        $this->salt=$salt;
         $this->isLogged=false;
         $this->validateFn=function(SecurityOne $sec) {
             return true;
@@ -53,7 +70,10 @@ class SecurityOne
         $this->loginFn=function(SecurityOne $sec) {
             $sec->user='';
             $sec->name='';
-            $sec->email='';
+            $sec->email=null;
+            $sec->iduser=null;
+            $sec->phone=null;
+            $sec->address=null;
             $sec->group='';
             return true;
         };
@@ -83,18 +103,35 @@ class SecurityOne
         return md5($ip.$browser);
     }
     private function serialize() {
-        return ['user'=>$this->user
+        $r=['user'=>$this->user
             ,'name'=>$this->name
-            ,'email'=>$this->email
             ,'uid'=>$this->uid
             ,'group'=>$this->group];
+        /* optional fields */
+        if ($this->email!==null) $r['email']=$this->email;
+        if ($this->iduser!==null) $r['iduser']=$this->iduser;
+        if ($this->phone!==null) $r['phone']=$this->phone;
+        if ($this->address!==null) $r['address']=$this->address;
+
+        return $r;
     }
+
+    public function encrypt($password)
+    {
+        return hash($this->encmethod,$this->salt.$password);
+    }
+
+
     private function deserialize($array) {
         $this->user=@$array['user'];
         $this->name=@$array['name'];
         $this->uid=@$array['uid'];
-        $this->email=@$array['email'];
         $this->group=@$array['group'];
+        /* optional fields */
+        $this->email=@$array['email'];
+        $this->iduser=@$array['iduser'];
+        $this->phone=@$array['phone'];
+        $this->address=@$array['address'];
     }
 
 
@@ -125,7 +162,12 @@ class SecurityOne
     public function setPermissionFn(callable $fn) {
         $this->getPermissionFn=$fn;
     }
-
+    public function setStoreCookieFn(callable $fn) {
+        $this->storeCookieFn=$fn;
+    }
+    public function setGetStoreCookieFn(callable $fn) {
+        $this->getStoreCookieFn=$fn;
+    }
     /**
      * Returns if the user is valid or not.
      */
@@ -142,21 +184,44 @@ class SecurityOne
         return (in_array($nameGroup,$this->group));
     }
 
+    public function getStoreCookie() {
+        if(isset($_COOKIE['phpcookiesess'])) {
+            $this->cookieID=$_COOKIE['phpcookiesess'];
+            return call_user_func($this->getStoreCookieFn,$this);
+        }
+        return false; // no cookie
+    }
+
+    // we store the cookie
+    public function storeCookie() {
+        @setcookie("phpcookiesess", $this->cookieID, time() + (86400 * 365), "/"); // 1 year
+        return call_user_func($this->storeCookieFn,$this);
+    }
+
     /**
      * It's used when the user log with an user and password. So it must be used only in the login screen.
      * After that, the user is stored in the session.
      * @param string $user
-     * @param string $password
-     * @param string string $other
+     * @param string $password Not encrypted password
+     * @param bool $storeCookie
+     * @param string $other
      * @return bool
      */
-    public function login($user,$password,$other='') {
+    public function login($user,$password,$storeCookie=false,$other='') {
         $this->user=$user;
-        $this->password=$password;
+        $this->password=$this->encrypt($password);
         $this->uid=$this->genUID();
         //$this->other=$other;
         if (call_user_func($this->loginFn,$this)) {
             @$_SESSION['_user']=$this->serialize();
+
+            if ($storeCookie) {
+                echo "store cookie";
+                $this->cookieID=sha1(uniqid().$this->genUID());
+
+                $this->storeCookie();
+            }
+
             @session_write_close();
             $this->isLogged=true;
             return true;
