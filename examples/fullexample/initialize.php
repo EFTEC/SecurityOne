@@ -58,10 +58,6 @@ try {
         , "email" => "johndoe@email.com"])
         ->from("user")
         ->insert();
-} catch (Exception $e) {
-    echo "Note: Insert 1 ommited ".$e->getMessage()."<br>";
-}
-try {
     $conn->set(["iduser"=>2
         ,"user"=>"user"
         ,"password"=>$sec->encrypt("user")
@@ -90,7 +86,11 @@ try {
 }
 
 
-$cantidad=$conn->select("count(*) c")->from("user")->firstScalar();
+try {
+    $cantidad = $conn->select("count(*) c")->from("user")->firstScalar();
+} catch (Exception $e) {
+    $cantidad=-1; // error
+}
 
 if ($cantidad>=2) {
     echo "OK: two or more users are ready ($cantidad)<br>";

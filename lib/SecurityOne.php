@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 1.1 20180922
+ * @version 1.3 20180922
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -36,7 +36,7 @@ class SecurityOne
 
 
     /** @var boolean */
-    private $isLogged=false;
+    public $isLogged=false;
 
     public $encmethod='sha256';
     public $cryptpwd='123456'; // not yet used.
@@ -68,13 +68,7 @@ class SecurityOne
             return true;
         };
         $this->loginFn=function(SecurityOne $sec) {
-            $sec->user='';
-            $sec->name='';
-            $sec->email=null;
-            $sec->iduser=null;
-            $sec->phone=null;
-            $sec->address=null;
-            $sec->group='';
+            $sec->factoryUser('','','','',null,null,null,null);
             return true;
         };
         $this->isAllowedFn=function($who,$where="",$when="",$id="") {
@@ -90,6 +84,17 @@ class SecurityOne
         }
     }
 
+    public function factoryUser($user,$password,$name,$group,$email=null,$iduser=null,$phone=null,$address=null) {
+        $this->user=$user;
+        $this->password=$password;
+        $this->name=$name;
+        $this->group=$group;
+        $this->email=$email;
+        $this->iduser=$iduser;
+        $this->phone=$phone;
+        $this->address=$address;
+    }
+
     /**
      * It generates an unique UID between the current IP and the user agent.
      * @return string
@@ -102,7 +107,7 @@ class SecurityOne
         $browser=@$_SERVER['HTTP_USER_AGENT'];
         return md5($ip.$browser);
     }
-    private function serialize() {
+    protected function serialize() {
         $r=['user'=>$this->user
             ,'name'=>$this->name
             ,'uid'=>$this->uid
@@ -213,17 +218,7 @@ class SecurityOne
         $this->uid=$this->genUID();
         //$this->other=$other;
         if (call_user_func($this->loginFn,$this)) {
-            @$_SESSION['_user']=$this->serialize();
-
-            if ($storeCookie) {
-                echo "store cookie";
-                $this->cookieID=sha1(uniqid().$this->genUID());
-
-                $this->storeCookie();
-            }
-
-            @session_write_close();
-            $this->isLogged=true;
+            $this->fixSession($storeCookie);
             return true;
         } else {
             @session_destroy();
@@ -232,6 +227,15 @@ class SecurityOne
             return false;
         }
     }
+    public function fixSession($storeCookie) {
+        @$_SESSION['_user']=$this->serialize();
+        if ($storeCookie) {
+            $this->cookieID=sha1(uniqid().$this->genUID());
+            $this->storeCookie();
+        }
+        @session_write_close();
+        $this->isLogged=true;
+    }
     /**
      * Logout and the session is destroyed.
      */
@@ -239,6 +243,8 @@ class SecurityOne
         $this->user="";
         $this->password="";
         $this->isLogged=false;
+        unset($_COOKIE['phpcookiesess']);
+        setcookie('phpcookiesess', null, -1, '/');
         @session_destroy();
         @session_write_close();
     }
