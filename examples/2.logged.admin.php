@@ -13,7 +13,7 @@ $security->getCurrent();
 
 if (!$security->isMember("admin")) {
     ?>
-    <h1 style="color:red">User is not administrator</h1>
+    <h1 style="color:red">User is not member of administrator</h1>
     <a href="1.basiclogin.php">login</a><br>
     <a href="3.logout.php">logout</a><br>
     <?php

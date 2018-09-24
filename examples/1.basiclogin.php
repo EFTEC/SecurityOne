@@ -9,12 +9,14 @@ $security->setLoginFn(
         if ($sec->user=='admin' && $sec->password=='admin') {
             // is an admin
             $sec->name="Bob.Admin";
+            $sec->role='admin';
             $sec->group=['admin','user','sysop'];
             return true;
         }
         if ($sec->user=='user' && $sec->password=='user') {
             // is an admin
             $sec->name="Bob.User";
+            $sec->role='user';
             $sec->group=['user'];
             return true;
         }

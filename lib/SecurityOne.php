@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 1.3 20180922
+ * @version 1.4 20180924
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -31,8 +31,9 @@ class SecurityOne
     public $phone=null;
     public $address=null;
     public $uid;
-    /** @var string[] */
+    /** @var string[] Group or permissions */
     public $group;
+    public $role;
 
 
     /** @var boolean */
@@ -57,7 +58,7 @@ class SecurityOne
     private  $getStoreCookieFn;
     /**
      * SecurityOne constructor.
-     * @param bool $autologin
+     * @param bool $autologin if true then it tries to load the user from the session (if any)
      * @param string $salt it's used for encryption, it must be changed and be unique for your project.
      */
     public function __construct($autologin=true,$salt="Zoamelgustar")
@@ -68,7 +69,7 @@ class SecurityOne
             return true;
         };
         $this->loginFn=function(SecurityOne $sec) {
-            $sec->factoryUser('','','','',null,null,null,null);
+            $sec->factoryUser('','','','','',null,null,null,null);
             return true;
         };
         $this->isAllowedFn=function($who,$where="",$when="",$id="") {
@@ -84,11 +85,12 @@ class SecurityOne
         }
     }
 
-    public function factoryUser($user,$password,$name,$group,$email=null,$iduser=null,$phone=null,$address=null) {
+    public function factoryUser($user,$password,$name,$group,$role,$email=null,$iduser=null,$phone=null,$address=null) {
         $this->user=$user;
         $this->password=$password;
         $this->name=$name;
         $this->group=$group;
+        $this->role=$role;
         $this->email=$email;
         $this->iduser=$iduser;
         $this->phone=$phone;
@@ -111,7 +113,8 @@ class SecurityOne
         $r=['user'=>$this->user
             ,'name'=>$this->name
             ,'uid'=>$this->uid
-            ,'group'=>$this->group];
+            ,'group'=>$this->group
+            ,'role'=>$this->role];
         /* optional fields */
         if ($this->email!==null) $r['email']=$this->email;
         if ($this->iduser!==null) $r['iduser']=$this->iduser;
@@ -132,6 +135,7 @@ class SecurityOne
         $this->name=@$array['name'];
         $this->uid=@$array['uid'];
         $this->group=@$array['group'];
+        $this->role=@$array['role'];
         /* optional fields */
         $this->email=@$array['email'];
         $this->iduser=@$array['iduser'];
