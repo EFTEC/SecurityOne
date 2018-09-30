@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 1.4 20180924
+ * @version 1.6 20180929
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -19,12 +19,18 @@ class SecurityOne
     const READWRITE=SecurityOne::READ +SecurityOne::WRITE;
     const ADMIN=SecurityOne::READ +SecurityOne::WRITE + 4;
 
-
+    /** @var string username of the user */
     public $user;
+    /** @var string password of the user */
     public $password;
+    /** @var string full name of the user */
     public $name;
+    /** @var int status of the user, 0=not enable */
+    public $status;
 
     public $cookieID;
+
+    public $useCookie=true; // for store session
 
     public $email=null;
     public $iduser=null;
@@ -69,7 +75,7 @@ class SecurityOne
             return true;
         };
         $this->loginFn=function(SecurityOne $sec) {
-            $sec->factoryUser('','','','','',null,null,null,null);
+            $sec->factoryUser('','','','','',0,null,null,null,null);
             return true;
         };
         $this->isAllowedFn=function($who,$where="",$when="",$id="") {
@@ -85,12 +91,13 @@ class SecurityOne
         }
     }
 
-    public function factoryUser($user,$password,$name,$group,$role,$email=null,$iduser=null,$phone=null,$address=null) {
+    public function factoryUser($user,$password,$name,$group,$role,$status,$email=null,$iduser=null,$phone=null,$address=null) {
         $this->user=$user;
         $this->password=$password;
         $this->name=$name;
         $this->group=$group;
         $this->role=$role;
+        $this->status=$status;
         $this->email=$email;
         $this->iduser=$iduser;
         $this->phone=$phone;
@@ -136,6 +143,7 @@ class SecurityOne
         $this->uid=@$array['uid'];
         $this->group=@$array['group'];
         $this->role=@$array['role'];
+        $this->status=@$array['status'];
         /* optional fields */
         $this->email=@$array['email'];
         $this->iduser=@$array['iduser'];
@@ -222,7 +230,7 @@ class SecurityOne
         $this->uid=$this->genUID();
         //$this->other=$other;
         if (call_user_func($this->loginFn,$this)) {
-            $this->fixSession($storeCookie);
+            $this->fixSession($storeCookie && $this->useCookie);
             return true;
         } else {
             @session_destroy();
@@ -247,8 +255,10 @@ class SecurityOne
         $this->user="";
         $this->password="";
         $this->isLogged=false;
-        unset($_COOKIE['phpcookiesess']);
-        setcookie('phpcookiesess', null, -1, '/');
+        if ($this->useCookie) {
+            unset($_COOKIE['phpcookiesess']);
+            setcookie('phpcookiesess', null, -1, '/');
+        }
         @session_destroy();
         @session_write_close();
     }
