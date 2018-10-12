@@ -19,7 +19,7 @@ if (!$security->isMember("admin")) {
     <?php
 } else {
     ?>
-    <h1 >Logged as Administrator <?=$security->user?> - <?=$security->name?></h1>
+    <h1 >Logged as Administrator <?=$security->user?> - <?=$security->fullName?></h1>
     <a href="1.basiclogin.php">login</a><br>
     <a href="3.logout.php">logout</a><br>
     <?php

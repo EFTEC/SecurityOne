@@ -11,7 +11,7 @@ if ($security->isLogged()===false) {
 }
 $user=$security->getCurrent();
 ?>
-<h1>Logged as <?=$security->user?> - <?=$security->name?></h1>
+<h1>Logged as <?=$security->user?> - <?=$security->fullName?></h1>
 <a href="3.logout.php">logout</a>
 
 

@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 1.6 20180929
+ * @version 2.0 20181011
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -19,23 +19,25 @@ class SecurityOne
     const READWRITE=SecurityOne::READ +SecurityOne::WRITE;
     const ADMIN=SecurityOne::READ +SecurityOne::WRITE + 4;
 
-    /** @var string username of the user */
+    /** @var mixed id of the user. For example, it could be the identity of the database */
+    public $iduser=null;
+    /** @var string username (to log) of the user */
     public $user;
     /** @var string password of the user */
     public $password;
     /** @var string full name of the user */
-    public $name;
+    public $fullName;
+    /** @var string email of the user. */
+    public $email=null;
     /** @var int status of the user, 0=not enable */
     public $status;
-
+    /** @var string Id of the cookie */
     public $cookieID;
 
     public $useCookie=true; // for store session
 
-    public $email=null;
-    public $iduser=null;
-    public $phone=null;
-    public $address=null;
+    /** @var string[] fields of the user for example for the phone, address and such */
+    public $extraFields=array();
     public $uid;
     /** @var string[] Group or permissions */
     public $group;
@@ -91,17 +93,16 @@ class SecurityOne
         }
     }
 
-    public function factoryUser($user,$password,$name,$group,$role,$status,$email=null,$iduser=null,$phone=null,$address=null) {
+    public function factoryUser($user,$password,$name,$group,$role,$status,$email=null,$iduser=null,$extra=[]) {
         $this->user=$user;
         $this->password=$password;
-        $this->name=$name;
+        $this->fullName=$name;
         $this->group=$group;
         $this->role=$role;
         $this->status=$status;
         $this->email=$email;
         $this->iduser=$iduser;
-        $this->phone=$phone;
-        $this->address=$address;
+        $this->extraFields=$extra;
     }
 
     /**
@@ -118,15 +119,14 @@ class SecurityOne
     }
     protected function serialize() {
         $r=['user'=>$this->user
-            ,'name'=>$this->name
+            ,'name'=>$this->fullName
             ,'uid'=>$this->uid
             ,'group'=>$this->group
             ,'role'=>$this->role];
         /* optional fields */
         if ($this->email!==null) $r['email']=$this->email;
         if ($this->iduser!==null) $r['iduser']=$this->iduser;
-        if ($this->phone!==null) $r['phone']=$this->phone;
-        if ($this->address!==null) $r['address']=$this->address;
+        $r['extrafields']=$this->extraFields;
 
         return $r;
     }
@@ -135,11 +135,14 @@ class SecurityOne
     {
         return hash($this->encmethod,$this->salt.$password);
     }
+    public function equalPassword($password) {
+        return $this->password==$this->encrypt($password);
+    }
 
 
     private function deserialize($array) {
         $this->user=@$array['user'];
-        $this->name=@$array['name'];
+        $this->fullName=@$array['name'];
         $this->uid=@$array['uid'];
         $this->group=@$array['group'];
         $this->role=@$array['role'];
@@ -147,8 +150,7 @@ class SecurityOne
         /* optional fields */
         $this->email=@$array['email'];
         $this->iduser=@$array['iduser'];
-        $this->phone=@$array['phone'];
-        $this->address=@$array['address'];
+        $this->extraFields=@$array['extrafields'];
     }
 
 

@@ -6,16 +6,16 @@ use eftec\SecurityOne;
 $security=new SecurityOne();
 $security->setLoginFn(
     function(SecurityOne $sec) {
-        if ($sec->user=='admin' && $sec->password=='admin') {
+        if ($sec->user=='admin' && $sec->equalPassword('admin')) {
             // is an admin
-            $sec->name="Bob.Admin";
+            $sec->fullName="Bob.Admin";
             $sec->role='admin';
             $sec->group=['admin','user','sysop'];
             return true;
         }
-        if ($sec->user=='user' && $sec->password=='user') {
+        if ($sec->user=='user' && $sec->equalPassword('user')) {
             // is an admin
-            $sec->name="Bob.User";
+            $sec->fullName="Bob.User";
             $sec->role='user';
             $sec->group=['user'];
             return true;
@@ -30,7 +30,7 @@ $logged=false;
 
 if ($button) {
     $logged=$security->login($_POST['user'],$_POST['password']);
-    $message=(!$logged)?"User or password incorrect":"";
+    $message=(!$logged)?"User {$_POST['user']} or password {$_POST['password']} incorrect":"";
 }
 
 
@@ -49,9 +49,10 @@ if (!$button || !$logged) {
     <?php
 } else {
     ?>
-    <h1>User logged as <?=$security->name;?></h1>
+    <h1>User logged as <?=$security->fullName;?></h1>
     <a href="2.logged.php">go to 2 as any user</a>
     <a href="2.logged.admin.php">go to 2 as administrator</a>
+    <a href="3.logout.php">go to 3 logout</a>
     <?php
 }
 
