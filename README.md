@@ -10,6 +10,7 @@ You can check a full example (for mysql) in
 
 ## Versions
 
+* 2018-10-27 2.1 Some maintenance changes.  Now serialize() and deserialize() are public and field extraFields is functiona.
 * 2018-10-11 2.0 We changed some fields. Now address and phone fields are part of extraFields.
 * 2018-09-29 1.6 added status and cookie.
 * 2018-09-22 1.4 added role

@@ -5,7 +5,7 @@ namespace eftec;
 /**
  * Class SecurityOne
  * This class manages the security.
- * @version 2.0 20181011
+ * @version 2.1 2018-oct-27
  * @package eftec
  * @author Jorge Castro Castillo
  * @copyright (c) Jorge Castro C. MIT License  https://github.com/EFTEC/SecurityOne
@@ -36,7 +36,10 @@ class SecurityOne
 
     public $useCookie=true; // for store session
 
-    /** @var string[] fields of the user for example for the phone, address and such */
+    /**
+     * @var array fields of the user for example for the phone, address and such<br>
+     * Example ['address'=>'','nationalid'=>'','phone'=>'','iddistrict'=>0];
+     */
     public $extraFields=array();
     public $uid;
     /** @var string[] Group or permissions */
@@ -77,7 +80,7 @@ class SecurityOne
             return true;
         };
         $this->loginFn=function(SecurityOne $sec) {
-            $sec->factoryUser('','','','','',0,null,null,null,null);
+            $sec->factoryUser('','','',[],'',0,null,null,null);
             return true;
         };
         $this->isAllowedFn=function($who,$where="",$when="",$id="") {
@@ -93,6 +96,18 @@ class SecurityOne
         }
     }
 
+    /**
+     * It sets the current user.
+     * @param string $user
+     * @param string $password
+     * @param string $name
+     * @param string[] $group
+     * @param string $role
+     * @param int $status 0=disabled,1=enabled
+     * @param string $email
+     * @param string $iduser
+     * @param array $extra
+     */
     public function factoryUser($user,$password,$name,$group,$role,$status,$email=null,$iduser=null,$extra=[]) {
         $this->user=$user;
         $this->password=$password;
@@ -117,7 +132,13 @@ class SecurityOne
         $browser=@$_SERVER['HTTP_USER_AGENT'];
         return md5($ip.$browser);
     }
-    protected function serialize() {
+
+    /**
+     * Returns an associative array with the current user
+     * @return array=['user'='','name'=>'','uid'=>'','group'=>[],'role'=>''
+     *              ,'email'=>'','iduser'=>'','extrafields'=>[]]
+     */
+    public function serialize() {
         $r=['user'=>$this->user
             ,'name'=>$this->fullName
             ,'uid'=>$this->uid
@@ -131,6 +152,13 @@ class SecurityOne
         return $r;
     }
 
+    /**
+     * It encrypts a password. It uses the salt and algorytm defined by the class
+     * @param $password (unencrypted password)
+     * @return string (encrypted password)
+     * @see SecurityOne::$salt
+     * @see SecurityOne::$encmethod
+     */
     public function encrypt($password)
     {
         return hash($this->encmethod,$this->salt.$password);
@@ -139,8 +167,12 @@ class SecurityOne
         return $this->password==$this->encrypt($password);
     }
 
-
-    private function deserialize($array) {
+    /**
+     * Set the current user by using an associative array
+     * @param $array=['user'=>'','name'=>'','uid'=>'','group'=>[],role=>''
+     *          ,'status'=>0,'email'=>'','iduser'=>0,'extrafields'=>[]]
+     */
+    public function deserialize($array) {
         $this->user=@$array['user'];
         $this->fullName=@$array['name'];
         $this->uid=@$array['uid'];
@@ -223,10 +255,9 @@ class SecurityOne
      * @param string $user
      * @param string $password Not encrypted password
      * @param bool $storeCookie
-     * @param string $other
      * @return bool
      */
-    public function login($user,$password,$storeCookie=false,$other='') {
+    public function login($user,$password,$storeCookie=false) {
         $this->user=$user;
         $this->password=$this->encrypt($password);
         $this->uid=$this->genUID();
@@ -251,7 +282,7 @@ class SecurityOne
         $this->isLogged=true;
     }
     /**
-     * Logout and the session is destroyed.
+     * Logout and the session is destroyed. It doesn't redirect to the home page.
      */
     public function logout() {
         $this->user="";

@@ -1,7 +1,7 @@
 {
     "name": "eftec/securityone",
     "description": "It's a barebone security class written on PHP",
-    "version": "2.0",
+    "version": "2.1",
     "type": "library",
     "keywords": [
         "security",
