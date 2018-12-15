@@ -1,9 +1,17 @@
 # SecurityOne
 It's a barebone security class written on PHP
 
+[![Packagist](https://img.shields.io/packagist/v/eftec/securityone.svg)](https://packagist.org/packages/eftec/securityone)
+[![Total Downloads](https://poser.pugx.org/eftec/securityone/downloads)](https://packagist.org/packages/eftec/securityone)
+[![License](https://img.shields.io/badge/license-LGPLV3-blue.svg)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg)]()
+[![php](https://img.shields.io/badge/php->5.4-green.svg)]()
+[![php](https://img.shields.io/badge/php-7.x-green.svg)]()
+[![Doc](https://img.shields.io/badge/docs-100%25-green.svg)]()
+
 ## Usage
 
-You can check a full example (for mysql) in
+You can check a full usage (for mysql) in
 
 [EFTEC/SecurityOneMysql](https://github.com/EFTEC/SecurityOneMysql)
 

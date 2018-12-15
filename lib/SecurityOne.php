@@ -90,6 +90,7 @@ class SecurityOne
             return SecurityOne::READWRITE;
         };
 
+
         @session_start();
         if ($autologin) {
             $this->isLogged=is_array($this->getCurrent());
@@ -147,6 +148,7 @@ class SecurityOne
         /* optional fields */
         if ($this->email!==null) $r['email']=$this->email;
         if ($this->iduser!==null) $r['iduser']=$this->iduser;
+
         $r['extrafields']=$this->extraFields;
 
         return $r;
@@ -339,6 +341,7 @@ class SecurityOne
      * @return bool
      */
     public function getCurrent($closeSession=false) {
+
         if (session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE) {
             $b=@session_start();
             if (!$b) return false; // session is not open and I am unable to open it
